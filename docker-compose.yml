@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=iir4
+      - MYSQL_DB=todos
+      - NODE_ENV=development
+    command: sh -c "yarn install && yarn run dev"
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=iir4
+      - MYSQL_DATABASE=todos
+    volumes:
+      - todo-mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      interval: 10s
+      retries: 10
+
+volumes:
+  todo-mysql-data:
+
+networks:
+  app-network:
+    driver: bridge
